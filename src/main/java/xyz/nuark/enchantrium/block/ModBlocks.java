@@ -8,6 +8,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -15,7 +17,9 @@ import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nuark.enchantrium.Enchantrium;
+import xyz.nuark.enchantrium.block.custom.EnchanterBlock;
 import xyz.nuark.enchantrium.item.ModItems;
+import xyz.nuark.enchantrium.setup.ModSetup;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -23,6 +27,10 @@ import java.util.function.Supplier;
 public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, Enchantrium.MOD_ID);
+
+    public static final RegistryObject<Block> ENCHANTER = registerBlock("enchanter",
+            () -> new EnchanterBlock(BlockBehaviour.Properties.copy(Blocks.ENCHANTING_TABLE).noOcclusion())
+    );
 
     private static <T extends Block> RegistryObject<T> registerBlockWithoutBlockItem(String name, Supplier<T> block) {
         return BLOCKS.register(name, block);
@@ -36,7 +44,7 @@ public class ModBlocks {
 
     private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block, String tooltipKey) {
         return ModItems.ITEMS.register(name, () -> new BlockItem(block.get(),
-                new Item.Properties().tab(ModItems.ITEM_GROUP)) {
+                new Item.Properties().tab(ModSetup.ITEM_GROUP)) {
             @Override
             public void appendHoverText(@NotNull ItemStack pStack, @Nullable Level pLevel, @NotNull List<Component> pTooltip, @NotNull TooltipFlag pFlag) {
                 pTooltip.add(new TranslatableComponent(tooltipKey));
@@ -52,7 +60,7 @@ public class ModBlocks {
 
     private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block) {
         return ModItems.ITEMS.register(name, () -> new BlockItem(block.get(),
-                new Item.Properties().tab(ModItems.ITEM_GROUP)));
+                new Item.Properties().tab(ModSetup.ITEM_GROUP)));
     }
 
     public static void register(IEventBus eventBus) {

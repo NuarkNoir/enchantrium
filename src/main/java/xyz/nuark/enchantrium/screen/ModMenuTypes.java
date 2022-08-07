@@ -14,6 +14,10 @@ public class ModMenuTypes {
     public static final DeferredRegister<MenuType<?>> MENUS =
             DeferredRegister.create(ForgeRegistries.CONTAINERS, Enchantrium.MOD_ID);
 
+    public static final RegistryObject<MenuType<EnchanterMenu>> ENCHANTER_MENU = registerMenuType(
+            EnchanterMenu::new, "enchanter_menu"
+    );
+
     private static <T extends AbstractContainerMenu> RegistryObject<MenuType<T>> registerMenuType(IContainerFactory<T> factory, String name) {
         return MENUS.register(name, () -> IForgeMenuType.create(factory));
     }
