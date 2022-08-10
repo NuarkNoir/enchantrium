@@ -24,4 +24,21 @@ public class EnchantmentUtil {
 
         return list;
     }
+
+    public static EnchantmentCost calculateEnchantmentPrice(List<EnchantmentInstance> enchantments, boolean hasUnbreaking) {
+        if (enchantments.isEmpty()) {
+            return new EnchantmentCost(0, 0, 0);
+        }
+        int lapis = Math.min(20 + enchantments.size() * (hasUnbreaking ? 6 : 3), 64);
+        int netherite = Math.min(Math.max((hasUnbreaking ? 5 : -3) + enchantments.size() / 2, 0), 64);
+        int levels = enchantments.stream().reduce(
+                0,
+                (acc, enchantment) -> acc + enchantment.level,
+                Integer::sum
+        );
+        return new EnchantmentCost(levels, lapis, netherite);
+    }
+
+    public record EnchantmentCost(int levels, int lapis, int netherite) {
+    }
 }

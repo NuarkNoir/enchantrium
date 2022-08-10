@@ -17,7 +17,6 @@ import net.minecraftforge.common.Tags;
 import net.minecraftforge.items.CapabilityItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nuark.enchantrium.Enchantrium;
 import xyz.nuark.enchantrium.block.ModBlocks;
 import xyz.nuark.enchantrium.block.entity.custom.EnchanterBlockEntity;
 import xyz.nuark.enchantrium.network.Networking;
@@ -33,6 +32,7 @@ public class EnchanterMenu extends AbstractContainerMenu {
 
     private ItemStack inputStack = new ItemStack(Items.AIR);
     private List<EnchantmentInstance> enchantments = Lists.newArrayList();
+    private boolean unbreakingSet = false;
     private int currentEnchantmentIndex = -1;
     private final Object lock = new Object();
 
@@ -42,7 +42,7 @@ public class EnchanterMenu extends AbstractContainerMenu {
 
     public EnchanterMenu(int containerId, Inventory inv, BlockEntity entity) {
         super(ModMenuTypes.ENCHANTER_MENU.get(), containerId);
-        checkContainerSize(inv, 2);
+        checkContainerSize(inv, 3);
         blockEntity = ((EnchanterBlockEntity) entity);
         this.level = inv.player.level;
 
@@ -55,8 +55,12 @@ public class EnchanterMenu extends AbstractContainerMenu {
                     stack -> EnchantmentUtil.canBeEnchanted(stack) && !stack.isEnchanted() && !stack.is(Items.BOOK)
             ));
             this.addSlot(new FilteredSlot(
-                    handler, 1, 8, 43,
-                    stack -> stack.is(Tags.Items.GEMS_EMERALD) || stack.is(Tags.Items.INGOTS_NETHERITE)
+                    handler, 1, 31, 19,
+                    stack -> stack.is(Tags.Items.STORAGE_BLOCKS_LAPIS)
+            ));
+            this.addSlot(new FilteredSlot(
+                    handler, 2, 54, 19,
+                    stack -> stack.is(Tags.Items.INGOTS_NETHERITE)
             ));
         });
     }
@@ -79,33 +83,55 @@ public class EnchanterMenu extends AbstractContainerMenu {
         }
     }
 
+    public boolean unbreakable() {
+        return unbreakingSet;
+    }
+
+    public EnchantmentUtil.EnchantmentCost getEnchantmentRequirements() {
+        return EnchantmentUtil.calculateEnchantmentPrice(this.enchantments.stream().filter(e -> e.level > 0).toList(), unbreakingSet);
+    }
+
+    public boolean requirementsMet(Player player, EnchantmentUtil.EnchantmentCost enchantmentRequirements) {
+        return player.experienceLevel >= enchantmentRequirements.levels()
+                && blockEntity.getEmeralds().getCount() >= enchantmentRequirements.lapis()
+                && blockEntity.getNetherite().getCount() >= enchantmentRequirements.netherite();
+    }
+
     @Override
     public boolean clickMenuButton(Player player, int buttonId) {
-        if (buttonId < 0 || buttonId >= 5) {
+        if (buttonId < 0 || buttonId >= 6) {
             Util.logAndPauseIfInIde(player.getName() + " pressed invalid button id: " + buttonId);
             return false;
         }
 
-        Enchantrium.LOGGER.debug("{} clicked button {}", player.getName(), buttonId);
         synchronized (lock) {
             if (buttonId == 0) {
-                Networking.sendToServer(new PacketEnchantItem(blockEntity.getBlockPos(), this.enchantments.stream().filter(e -> e.level > 0).toList()));
+                var enchantments = this.enchantments.stream().filter(e -> e.level > 0).toList();
+                if (enchantments.isEmpty()) return true;
+                Networking.sendToServer(new PacketEnchantItem(
+                        blockEntity.getBlockPos(),
+                        enchantments,
+                        getEnchantmentRequirements(),
+                        unbreakingSet
+                ));
             } else if (buttonId == 1) {
-                currentEnchantmentIndex = (currentEnchantmentIndex + 1) % enchantments.size();
-            } else if (buttonId == 2) {
                 currentEnchantmentIndex = (currentEnchantmentIndex - 1 + enchantments.size()) % enchantments.size();
+            } else if (buttonId == 2) {
+                currentEnchantmentIndex = (currentEnchantmentIndex + 1) % enchantments.size();
             } else if (buttonId == 3) {
+                var enchantment = this.enchantments.get(currentEnchantmentIndex);
+                this.enchantments.set(currentEnchantmentIndex, new EnchantmentInstance(
+                        enchantment.enchantment,
+                        enchantment.level > 0 ? (enchantment.level - 1) : 0
+                ));
+            } else if (buttonId == 4) {
                 var enchantment = this.enchantments.get(currentEnchantmentIndex);
                 this.enchantments.set(currentEnchantmentIndex, new EnchantmentInstance(
                         enchantment.enchantment,
                         enchantment.level < enchantment.enchantment.getMaxLevel() ? (enchantment.level + 1) : enchantment.level
                 ));
             } else {
-                var enchantment = this.enchantments.get(currentEnchantmentIndex);
-                this.enchantments.set(currentEnchantmentIndex, new EnchantmentInstance(
-                        enchantment.enchantment,
-                        enchantment.level > 0 ? (enchantment.level - 1) : 0
-                ));
+                unbreakingSet = !unbreakingSet;
             }
         }
         return true;
@@ -119,14 +145,14 @@ public class EnchanterMenu extends AbstractContainerMenu {
     private void addPlayerInventory(Inventory playerInventory) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
-                addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 86 + i * 18));
+                addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 150 + i * 18));
             }
         }
     }
 
     private void addPlayerHotbar(Inventory playerInventory) {
         for (int i = 0; i < 9; i++) {
-            addSlot(new Slot(playerInventory, i, 8 + i * 18, 144));
+            addSlot(new Slot(playerInventory, i, 8 + i * 18, 208));
         }
     }
 
@@ -146,7 +172,7 @@ public class EnchanterMenu extends AbstractContainerMenu {
     private static final int TE_INVENTORY_FIRST_SLOT_INDEX = VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT;
 
     // THIS YOU HAVE TO DEFINE!
-    private static final int TE_INVENTORY_SLOT_COUNT = 2;  // must be the number of slots you have!
+    private static final int TE_INVENTORY_SLOT_COUNT = 3;  // must be the number of slots you have!
 
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player playerIn, int index) {

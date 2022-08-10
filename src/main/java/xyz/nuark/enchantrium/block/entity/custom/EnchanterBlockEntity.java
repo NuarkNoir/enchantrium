@@ -11,9 +11,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,11 +24,12 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nuark.enchantrium.Enchantrium;
 import xyz.nuark.enchantrium.block.entity.ModBlockEntities;
 import xyz.nuark.enchantrium.screen.EnchanterMenu;
+import xyz.nuark.enchantrium.util.EnchantmentUtil;
 
 import java.util.List;
 
 public class EnchanterBlockEntity extends BlockEntity implements MenuProvider {
-    private final ItemStackHandler itemHandler = new ItemStackHandler(2) {
+    private final ItemStackHandler itemHandler = new ItemStackHandler(3) {
         @Override
         protected void onContentsChanged(int slot) {
             setChanged();
@@ -71,7 +70,7 @@ public class EnchanterBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    public void invalidateCaps()  {
+    public void invalidateCaps() {
         super.invalidateCaps();
         lazyItemHandler.invalidate();
     }
@@ -105,18 +104,26 @@ public class EnchanterBlockEntity extends BlockEntity implements MenuProvider {
         return itemHandler.getStackInSlot(0);
     }
 
-    public void enchant(List<EnchantmentInstance> enchantments) {
-        if (itemHandler.extractItem(1, 1, true).is(Items.AIR)) {
-            return;
-        }
+    public ItemStack getEmeralds() {
+        return itemHandler.getStackInSlot(1);
+    }
 
+    public ItemStack getNetherite() {
+        return itemHandler.getStackInSlot(2);
+    }
+
+    public boolean enchant(List<EnchantmentInstance> enchantments, EnchantmentUtil.EnchantmentCost enchantmentCost, boolean setUnbreakable) {
         ItemStack input = itemHandler.extractItem(0, 1, false);
-        itemHandler.extractItem(1, 1, false);
+        itemHandler.extractItem(1, enchantmentCost.lapis(), false);
+        itemHandler.extractItem(2, enchantmentCost.netherite(), false);
         for (EnchantmentInstance enchantment : enchantments) {
             input.enchant(enchantment.enchantment, enchantment.level);
         }
+        input.getOrCreateTag().putBoolean("Unbreakable", setUnbreakable);
 
         itemHandler.setStackInSlot(0, input);
         itemHandler.insertItem(0, input, false);
+
+        return true;
     }
 }
