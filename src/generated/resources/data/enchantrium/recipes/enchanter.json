@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "x#x",
+    "#y#"
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:gems/diamond"
+    },
+    "#": {
+      "tag": "forge:storage_blocks/copper"
+    },
+    "y": {
+      "item": "minecraft:enchanting_table"
+    }
+  },
+  "result": {
+    "item": "enchantrium:enchanter"
+  }
+}

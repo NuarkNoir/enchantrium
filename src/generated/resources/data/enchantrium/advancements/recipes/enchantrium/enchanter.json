@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "enchantrium:enchanter"
+    ]
+  },
+  "criteria": {
+    "enchanting": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:enchanting_table"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "enchantrium:enchanter"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "enchanting",
+      "has_the_recipe"
+    ]
+  ]
+}
