@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "enchantrium:block/enchanter_side",
+    "up": "enchantrium:block/enchanter_top",
+    "north": "enchantrium:block/enchanter_side",
+    "south": "enchantrium:block/enchanter_side",
+    "east": "enchantrium:block/enchanter_side",
+    "west": "enchantrium:block/enchanter_side"
+  }
+}
