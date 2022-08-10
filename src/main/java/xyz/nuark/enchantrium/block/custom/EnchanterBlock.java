@@ -7,7 +7,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -46,8 +45,8 @@ public class EnchanterBlock extends BaseEntityBlock {
                                  Player player, InteractionHand interactionHand, BlockHitResult hitResult) {
         if (!level.isClientSide()) {
             BlockEntity entity = level.getBlockEntity(blockPos);
-            if(entity instanceof EnchanterBlockEntity) {
-                NetworkHooks.openGui(((ServerPlayer)player), (EnchanterBlockEntity)entity, blockPos);
+            if (entity instanceof EnchanterBlockEntity) {
+                NetworkHooks.openGui(((ServerPlayer) player), (EnchanterBlockEntity) entity, blockPos);
             } else {
                 throw new IllegalStateException("Our Container provider is missing!");
             }

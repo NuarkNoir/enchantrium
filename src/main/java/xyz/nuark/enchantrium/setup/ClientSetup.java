@@ -1,7 +1,6 @@
 package xyz.nuark.enchantrium.setup;
 
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import xyz.nuark.enchantrium.screen.EnchanterScreen;
 import xyz.nuark.enchantrium.screen.ModMenuTypes;
