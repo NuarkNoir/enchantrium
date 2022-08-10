@@ -8,7 +8,6 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import xyz.nuark.enchantrium.Enchantrium;
 import xyz.nuark.enchantrium.network.message.PacketEnchantItem;
-import xyz.nuark.enchantrium.network.message.PacketSyncEnchantedItemToClient;
 
 public class Networking {
     public static final String PROTOCOL_VERSION = "1";
@@ -31,12 +30,6 @@ public class Networking {
                 .encoder(PacketEnchantItem::encode)
                 .decoder(PacketEnchantItem::decode)
                 .consumer(PacketEnchantItem::handle)
-                .add();
-
-        INSTANCE.messageBuilder(PacketSyncEnchantedItemToClient.class, nextPacketId(), NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(PacketSyncEnchantedItemToClient::encode)
-                .decoder(PacketSyncEnchantedItemToClient::decode)
-                .consumer(PacketSyncEnchantedItemToClient::handle)
                 .add();
     }
 
